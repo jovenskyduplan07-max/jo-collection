@@ -204,9 +204,6 @@
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   @media(max-width:640px){nav .lien{display:none}}
 
-  /* Bouton admin discret : apparaît après un appui long sur le logo */
-  #boutonAdminCache{position:fixed;right:16px;bottom:18px;z-index:1000;display:none;background:#b99aae;color:#211724;border:1px solid #6b5365;border-radius:999px;padding:11px 18px;font:600 14px inherit;box-shadow:0 5px 18px rgba(0,0,0,.25);cursor:pointer}
-  #boutonAdminCache.visible{display:block}
 </style>
 </head>
 <body>
@@ -340,7 +337,6 @@
     <p class="droits" data-i18n="droits">Tous droits réservés. Le logo, les photos, les textes et le contenu de ce site ne peuvent être copiés ni réutilisés sans l'autorisation écrite de JO Collection.</p>
   </div>
 </footer>
-<button id="boutonAdminCache" type="button" aria-label="Ouvrir l’administration">Administration</button>
 
 
 <dialog id="dlgProduit" aria-labelledby="dlgNom">
@@ -974,27 +970,6 @@
     window.addEventListener("resize", function(){ mesurer(); dessiner(); });
     window.addEventListener("load", function(){ mesurer(); dessiner(); });
   })();
-  // Accès discret : maintenir le logo d’en-tête pendant 3 secondes fait apparaître le bouton admin.
-  var logoAdmin = document.querySelector("header.top .logo");
-  var boutonAdmin = $("boutonAdminCache");
-  var timerAppuiLogo = null, appuiLongDeclenche = false;
-  if (logoAdmin && boutonAdmin) {
-    logoAdmin.addEventListener("pointerdown", function() {
-      appuiLongDeclenche = false;
-      clearTimeout(timerAppuiLogo);
-      timerAppuiLogo = setTimeout(function(){
-        appuiLongDeclenche = true;
-        boutonAdmin.classList.add("visible");
-      }, 3000);
-    });
-    ["pointerup", "pointercancel", "pointerleave"].forEach(function(evt){
-      logoAdmin.addEventListener(evt, function(){ clearTimeout(timerAppuiLogo); });
-    });
-    logoAdmin.addEventListener("click", function(e){
-      if (appuiLongDeclenche) { e.preventDefault(); appuiLongDeclenche = false; }
-    });
-    boutonAdmin.addEventListener("click", function(){ window.location.assign("https://jovenskyduplan07-max.github.io/jo-collection/admin.html"); });
-  }
   // Synchroniser le catalogue public avec les produits enregistrés dans Supabase.
   // En cas d'erreur réseau ou si la table est vide, le catalogue de secours reste visible.
   (async function chargerCatalogueAdmin(){
