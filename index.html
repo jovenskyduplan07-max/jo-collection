@@ -408,6 +408,7 @@
   </div>
 </aside>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   "use strict";
@@ -994,6 +995,47 @@
     });
     boutonAdmin.addEventListener("click", function(){ window.location.assign("https://jovenskyduplan07-max.github.io/jo-collection/admin.html"); });
   }
+  // Synchroniser le catalogue public avec les produits enregistrés dans Supabase.
+  // En cas d'erreur réseau ou si la table est vide, le catalogue de secours reste visible.
+  (async function chargerCatalogueAdmin(){
+    try {
+      if (!window.supabase || !window.supabase.createClient) return;
+      var clientPublic = window.supabase.createClient(
+        "https://ohomrjxkqtkgvrgidusy.supabase.co",
+        "sb_publishable_bqEtoH1L2VPiu9JjRJP7RA_1Vl2hm7L"
+      );
+      var resultat = await clientPublic.from("products").select("*").order("created_at", {ascending:false});
+      if (resultat.error || !Array.isArray(resultat.data) || resultat.data.length === 0) return;
+      var produitsEnregistres = resultat.data.map(function(p){
+        var images = Array.isArray(p.images) ? p.images : [];
+        var imagePrincipale = p.image_url || images[0] || "";
+        var description = p.description || "";
+        return {
+          id: String(p.id),
+          type: p.product_type === "coffret" ? "coffret" : "article",
+          nom: p.name || "Produit JO Collection",
+          cat: p.category || "beaute",
+          prix: Number(p.price || 0),
+          prixAvant: p.old_price == null ? undefined : Number(p.old_price),
+          image: imagePrincipale,
+          images: images,
+          stock: Boolean(p.stock),
+          nouveau: Boolean(p.is_new),
+          selection: Boolean(p.is_featured),
+          occasions: Array.isArray(p.occasions) ? p.occasions : [],
+          contenu: {fr: description, ht: description}
+        };
+      });
+      PRODUITS = produitsEnregistres;
+      dessinerVolets();
+      dessinerFiltres();
+      dessinerGrille();
+    } catch (e) {
+      // Ne pas bloquer la boutique si Supabase est temporairement indisponible.
+      console.warn("Catalogue Supabase indisponible; affichage du catalogue local.", e);
+    }
+  })();
+
   $("annee").textContent = String(new Date().getFullYear());
   initDialogues();
   panier = chargerPanier();
