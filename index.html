@@ -992,7 +992,7 @@
     logoAdmin.addEventListener("click", function(e){
       if (appuiLongDeclenche) { e.preventDefault(); appuiLongDeclenche = false; }
     });
-    boutonAdmin.addEventListener("click", function(){ window.location.href = "admin.html"; });
+    boutonAdmin.addEventListener("click", function(){ window.location.assign("https://jovenskyduplan07-max.github.io/jo-collection/admin.html"); });
   }
   $("annee").textContent = String(new Date().getFullYear());
   initDialogues();
