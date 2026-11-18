@@ -4,7 +4,7 @@
 <!-- © JO Collection. Tous droits réservés. Le code, les textes, le logo et les photos de ce site sont protégés. Toute copie ou réutilisation sans autorisation écrite est interdite. -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' https: data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'; connect-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' https: data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; form-action 'none'; base-uri 'none'; frame-ancestors 'none'; connect-src 'self' https://ohomrjxkqtkgvrgidusy.supabase.co wss://ohomrjxkqtkgvrgidusy.supabase.co">
 <meta name="referrer" content="no-referrer">
 <meta name="author" content="JO Collection">
 <meta name="copyright" content="© JO Collection. Tous droits réservés.">
@@ -429,6 +429,7 @@
   </div>
 </aside>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   "use strict";
@@ -1055,10 +1056,47 @@
   $("annee").textContent = String(new Date().getFullYear());
   $("rechercheProduit").addEventListener("input",function(){ recherche=this.value.trim().toLocaleLowerCase(); dessinerGrille(); });
   $("voirFavoris").addEventListener("click",function(){ afficherFavoris=!afficherFavoris; this.textContent=afficherFavoris?"♥ Mes favoris (actifs)":"♡ Mes favoris"; majFavoris(); dessinerGrille(); });
+  /* ---- Catalogue dynamique JO Collection (Supabase) ---- */
+  async function chargerCatalogueSupabase(){
+    try {
+      if(!window.supabase || !window.supabase.createClient) return;
+      var sb = window.supabase.createClient(
+        "https://ohomrjxkqtkgvrgidusy.supabase.co",
+        "sb_publishable_bqEtoH1L2VPiu9JjRJP7RA_1Vl2hm7L"
+      );
+      var resultat = await sb.from("products").select("*").order("created_at", {ascending:false});
+      if(resultat.error){ console.warn("JO Collection: catalogue Supabase indisponible", resultat.error.message); return; }
+      PRODUITS = (resultat.data || []).map(function(p){
+        var description = p.description || "";
+        return {
+          id: p.id,
+          type: p.product_type || "article",
+          cat: p.category || "accessoires",
+          nom: p.name || "Produit",
+          prix: Number(p.price || 0),
+          prixAvant: p.old_price == null ? undefined : Number(p.old_price),
+          image: p.image_url || "",
+          images: Array.isArray(p.images) ? p.images : [],
+          stock: p.stock !== false,
+          nouveau: p.is_new === true,
+          selection: p.is_featured === true,
+          occasions: Array.isArray(p.occasions) ? p.occasions : [],
+          contenu: {fr: description, kr: description}
+        };
+      });
+      dessinerVolets();
+      dessinerFiltres();
+      dessinerGrille();
+    } catch(err) {
+      console.warn("JO Collection: erreur de connexion au catalogue", err);
+    }
+  }
+
   initDialogues();
   panier = chargerPanier();
   appliquerLangue("fr");
   majFavoris();
+  chargerCatalogueSupabase();
 })();
 </script>
 </body>
