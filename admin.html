@@ -34,7 +34,7 @@
 (function(){'use strict';
 const SUPABASE_URL="https://ohomrjxkqtkgvrgidusy.supabase.co";
 const SUPABASE_KEY="sb_publishable_bqEtoH1L2VPiu9JjRJP7RA_1Vl2hm7L";
-const ADMIN_EMAIL='duplanjovensky07@gmail.com';const BUCKET='products';
+const ADMIN_EMAIL='duplanjovensky07@gmail.com';const BUCKET='product-images';
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 function message(id,text,kind){const e=$(id);e.textContent=text;e.className='status'+(kind?' '+kind:'');e.classList.remove('hidden');}
